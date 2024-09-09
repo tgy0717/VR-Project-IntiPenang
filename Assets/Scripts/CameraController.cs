@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    private float rotateSpeed = 300.0f;
+    private float rotateSpeed = 1000.0f;
     private float zoomSpeed = 600.0f;
     private float zoomAmount = 0;
 
-    //tour manager
+    // Tour manager
     private TourManager tourManager;
 
     void Start()
     {
-        tourManager = FindObjectOfType<TourManager>(); 
+        tourManager = FindObjectOfType<TourManager>();
     }
 
     // Update is called once per frame
@@ -23,7 +23,7 @@ public class CameraController : MonoBehaviour
         {
             if (Input.GetMouseButton(0))
             {
-                //rotate camera according to the mouse
+                // Rotate camera according to the mouse
                 transform.localEulerAngles = new Vector3(transform.localEulerAngles.x + Input.GetAxis("Mouse Y") * Time.deltaTime * rotateSpeed, transform.localEulerAngles.y + Input.GetAxis("Mouse X") * Time.deltaTime * rotateSpeed, 0);
             }
 
@@ -37,8 +37,9 @@ public class CameraController : MonoBehaviour
 
     public void ResetCamera()
     {
-        transform.localEulerAngles = new Vector3(0, 0, 0);
+        // Reset rotation and position to (0, 0, 0)
+        transform.localEulerAngles = Vector3.zero;
         zoomAmount = 0f;
-        Camera.main.transform.localPosition = new Vector3(0, 0, zoomAmount);
+        Camera.main.transform.localPosition = Vector3.zero; 
     }
 }
