@@ -59,6 +59,7 @@ public class VRController : MonoBehaviour
                 objSites[i].SetActive(false);
             }
             imageMenuCanvas.SetActive(true);
+           
 
             //scrollRect.verticalNormalizedPosition = 1f;//refresh
         }
