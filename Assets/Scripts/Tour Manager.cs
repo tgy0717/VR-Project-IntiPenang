@@ -1,19 +1,25 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class TourManager : MonoBehaviour
 {
     public GameObject[] objSites; // Array of site objects to display
     public GameObject canvasMainMenu; // Reference to the main menu canvas
     public GameObject topBar; // Reference to the top bar UI element
-    public bool isCameraMove = false; // Flag to control camera movement
+    public GameObject dropDownMenu; // Reference to the dropdown menu
+    public bool isCameraMove = true; // Flag to control camera movement
 
     private GameObject lastHoveredObject = null;
     private GameObject currentHoveredUIElement = null;
+    private Camera mainCamera;  // Main Camera reference
+
+    public float zoomDuration = 0.2f;  // Duration for zoom effect
+    public float zoomFOV = 3f;  // Target FOV during zoom
+    private float originalFOV;  // Store original FOV
+
 
     // Reference to the HoverController script
     public HoverController hoverController;
@@ -25,6 +31,12 @@ public class TourManager : MonoBehaviour
         // Ensure the top bar is hidden at the start
         topBar.SetActive(false);
 
+        mainCamera = Camera.main;
+        if (mainCamera != null)
+        {
+            originalFOV = mainCamera.fieldOfView;
+        }
+
         // Find HoverController component
         if (hoverController == null)
         {
@@ -34,17 +46,66 @@ public class TourManager : MonoBehaviour
 
     void Update()
     {
-        if (isCameraMove)
+        // Check if pointer is over any UI element (including dropdown)
+        if (IsPointerOverUIElement())
         {
-            // Check for escape key press
-            if (Input.GetKeyDown(KeyCode.Escape))
+            // If hovering over dropdown, disable camera movement
+            if (EventSystem.current.currentSelectedGameObject == dropDownMenu)
             {
-                ReturnToMenu();
+                Debug.Log("Pointer is over dropdown menu, disabling camera movement.");
+                isCameraMove = false;
+            }
+            else
+            {
+                Debug.Log("Pointer is over other UI elements, camera movement disabled.");
+                isCameraMove = false;
+            }
+        }
+        else
+        {
+            // If not hovering over UI, enable camera movement
+            isCameraMove = true;
+        }
+
+        // Handle non-UI element raycasts (like 3D objects)
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out hit, 100.0f))
+        {
+            GameObject currentHoveredObject = hit.transform.gameObject;
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                HandleUIClick(currentHoveredObject);
             }
 
-            // Check for hovering over UI elements or 3D objects
-            
+            if (currentHoveredObject.CompareTag("NextSite"))
+            {
+                hoverController.DisplayHoverText(currentHoveredObject.name);
+                HighlightObject(currentHoveredObject);
+
+                // Reset previously hovered object if it exists and is different
+                if (lastHoveredObject != null && lastHoveredObject != currentHoveredObject)
+                {
+                    ResetObject(lastHoveredObject);
+                }
+
+                lastHoveredObject = currentHoveredObject;
+            }
         }
+        else
+        {
+            // If nothing is hovered, reset the last hovered 3D object and UI element
+            if (lastHoveredObject != null)
+            {
+                ResetObject(lastHoveredObject);
+                lastHoveredObject = null;
+                hoverController.ClearHoverText();
+            }
+        }
+
+        // Handle hover over UI elements and adjust image size accordingly
         if (hoverController.IsPointerOverUIElement(out GameObject uiElement))
         {
             // Handle hover over UI element with "NextSite" tag
@@ -66,52 +127,52 @@ public class TourManager : MonoBehaviour
         }
         else
         {
-            // If nothing is hovered, reset the last hovered UI element immediately
+            // If no UI element is hovered, reset the last hovered UI element
             if (currentHoveredUIElement != null)
             {
                 hoverController.ResetImageSize(currentHoveredUIElement);
                 hoverController.ResetHoverDesign(currentHoveredUIElement);
                 currentHoveredUIElement = null;
             }
-
-            // Handle non-UI element raycasts (like 3D objects)
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            if (Physics.Raycast(ray, out hit, 100.0f))
-            {
-                GameObject currentHoveredObject = hit.transform.gameObject;
-
-                if (Input.GetMouseButtonDown(0))
-                {
-                    HandleUIClick(currentHoveredObject);
-                }
-
-                if (currentHoveredObject.CompareTag("NextSite"))
-                {
-                    hoverController.DisplayHoverText(currentHoveredObject.name);
-                    HighlightObject(currentHoveredObject);
-
-                    if (lastHoveredObject != null && lastHoveredObject != currentHoveredObject)
-                    {
-                        ResetObject(lastHoveredObject);
-                    }
-
-                    lastHoveredObject = currentHoveredObject;
-                }
-            }
-            else
-            {
-                // If nothing is hovered, reset the last hovered 3D object and UI element
-                if (lastHoveredObject != null)
-                {
-                    ResetObject(lastHoveredObject);
-                    lastHoveredObject = null;
-                    hoverController.ClearHoverText();
-                }
-            }
         }
     }
+
+    // Check if the pointer is over any UI element
+    bool IsPointerOverUIElement()
+    {
+        return EventSystem.current.IsPointerOverGameObject();
+    }
+
+    IEnumerator ZoomAndLoadSite(int siteNumber)
+    {
+        // Animate the camera zoom to the target FOV
+        float elapsedTime = 0f;
+        while (elapsedTime < zoomDuration)
+        {
+            mainCamera.fieldOfView = Mathf.Lerp(originalFOV, zoomFOV, elapsedTime / zoomDuration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        // Ensure FOV is exactly the zoomFOV after the loop
+        mainCamera.fieldOfView = zoomFOV;
+
+        // After zoom, load the new site
+        LoadSite(siteNumber);
+
+        // Reset camera FOV to the original
+        elapsedTime = 0f;
+        while (elapsedTime < zoomDuration)
+        {
+            mainCamera.fieldOfView = Mathf.Lerp(zoomFOV, originalFOV, elapsedTime / zoomDuration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        // Ensure FOV is exactly the original FOV after resetting
+        mainCamera.fieldOfView = originalFOV;
+    }
+
 
     // Handle UI element click
     void HandleUIClick(GameObject uiElement)
@@ -123,7 +184,7 @@ public class TourManager : MonoBehaviour
         if (newSiteScript != null)
         {
             int siteToLoad = newSiteScript.GetSiteToload();
-            LoadSite(siteToLoad);
+            StartCoroutine(ZoomAndLoadSite(siteToLoad));
         }
     }
 
@@ -132,7 +193,7 @@ public class TourManager : MonoBehaviour
     {
         Renderer renderer = obj.GetComponent<Renderer>();
         if (renderer != null)
-        { 
+        {
             renderer.material.color = UnityEngine.Color.gray;  // Change to a highlight color
         }
     }
@@ -144,7 +205,7 @@ public class TourManager : MonoBehaviour
         if (renderer != null)
         {
             renderer.material.color = UnityEngine.Color.white;  // Reset to the original color
-        } 
+        }
     }
 
     public void LoadSite(int siteNumber)
@@ -160,6 +221,7 @@ public class TourManager : MonoBehaviour
         canvasMainMenu.SetActive(false);
         // Show the top bar
         topBar.SetActive(true);
+        dropDownMenu.SetActive(true);
         // Enable camera movement
         isCameraMove = true;
         GetComponent<CameraController>().ResetCamera();
@@ -176,6 +238,7 @@ public class TourManager : MonoBehaviour
         }
         // Hide the top bar
         topBar.SetActive(false);
+        dropDownMenu.SetActive(false);
         // Disable camera movement
         isCameraMove = false;
         GetComponent<CameraController>().ResetCamera();
