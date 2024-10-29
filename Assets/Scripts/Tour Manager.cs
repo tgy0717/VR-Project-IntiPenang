@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -10,6 +11,7 @@ public class TourManager : MonoBehaviour
     public GameObject canvasMainMenu; // Reference to the main menu canvas
     public GameObject topBar; // Reference to the top bar UI element
     public GameObject dropDownMenu; // Reference to the dropdown menu
+    public GameObject sidebar; // Reference to the dropdown menu
     public bool isCameraMove = true; // Flag to control camera movement
 
     private GameObject lastHoveredObject = null;
@@ -222,6 +224,7 @@ public class TourManager : MonoBehaviour
         // Show the top bar
         topBar.SetActive(true);
         dropDownMenu.SetActive(true);
+        sidebar.SetActive(true);
         // Enable camera movement
         isCameraMove = true;
         GetComponent<CameraController>().ResetCamera();
@@ -239,6 +242,7 @@ public class TourManager : MonoBehaviour
         // Hide the top bar
         topBar.SetActive(false);
         dropDownMenu.SetActive(false);
+        sidebar.SetActive(false);
         // Disable camera movement
         isCameraMove = false;
         GetComponent<CameraController>().ResetCamera();

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class HomeManager : MonoBehaviour
@@ -49,5 +47,18 @@ public class HomeManager : MonoBehaviour
 
         // Open the homepage canvas
         homepageCanvas.SetActive(true);
+    }
+
+    // Function to quit the application
+    public void QuitApplication()
+    {
+        // Quit the application
+        Debug.Log("Quit button clicked!");
+        Application.Quit();
+
+        // This is for testing purposes in the Unity Editor
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
     }
 }
