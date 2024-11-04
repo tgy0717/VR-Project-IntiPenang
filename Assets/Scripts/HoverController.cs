@@ -12,21 +12,22 @@ public class HoverController : MonoBehaviour
     private Vector3 originalSize; // Store the original size of the UI element
     private GameObject currentHoveredUIElement; // Track the current hovered UI element
 
-    // Reference to the Event System and Graphic Raycaster
+    // Reference to the Event System and a list of Graphic Raycasters
     public EventSystem eventSystem;
-    public GraphicRaycaster graphicRaycaster;
+    public List<GraphicRaycaster> graphicRaycasters = new List<GraphicRaycaster>();
 
     void Start()
     {
-        // Get the GraphicRaycaster and EventSystem from the Canvas if not assigned
-        if (graphicRaycaster == null)
-        {
-            graphicRaycaster = GetComponent<GraphicRaycaster>();
-        }
-
+        // Ensure the Event System is assigned
         if (eventSystem == null)
         {
             eventSystem = FindObjectOfType<EventSystem>();
+        }
+
+        // Find all GraphicRaycasters in child canvases if not assigned in Inspector
+        if (graphicRaycasters.Count == 0)
+        {
+            graphicRaycasters.AddRange(GetComponentsInChildren<GraphicRaycaster>());
         }
     }
 
@@ -37,13 +38,16 @@ public class HoverController : MonoBehaviour
             position = Input.mousePosition
         };
 
-        List<RaycastResult> results = new List<RaycastResult>();
-        graphicRaycaster.Raycast(pointerData, results);
-
-        if (results.Count > 0)
+        foreach (GraphicRaycaster raycaster in graphicRaycasters)
         {
-            hoveredUIElement = results[0].gameObject;
-            return true;
+            List<RaycastResult> results = new List<RaycastResult>();
+            raycaster.Raycast(pointerData, results);
+
+            if (results.Count > 0)
+            {
+                hoveredUIElement = results[0].gameObject;
+                return true;
+            }
         }
 
         hoveredUIElement = null;
@@ -101,10 +105,9 @@ public class HoverController : MonoBehaviour
         RectTransform rectTransform = uiElement.GetComponent<RectTransform>();
         if (rectTransform != null)
         {
-            rectTransform.localScale = originalSize;   
+            rectTransform.localScale = originalSize;
         }
     }
-
 
     // Apply hover design (e.g., shadows, color changes, etc.)
     public void ApplyHoverDesign(GameObject uiElement)
@@ -142,5 +145,4 @@ public class HoverController : MonoBehaviour
             }
         }
     }
-
 }

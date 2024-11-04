@@ -8,6 +8,7 @@ public class Sidebar : MonoBehaviour
     private bool isUIVisible = true; // Tracks the visibility state
     public GameObject topBar; // Reference to the top bar UI element
     public GameObject dropDownMenu; // Reference to the dropdown menu
+    public GameObject bottomBar; // Reference to the dropdown menu
 
     private bool isNextSiteHidden = false; // Tracks the visibility state of "NextSite" objects
     private List<GameObject> nextSiteObjects = new List<GameObject>(); // List to store active "NextSite" objects
@@ -32,9 +33,9 @@ public class Sidebar : MonoBehaviour
     {
         // Toggle visibility state
         isUIVisible = !isUIVisible;
-        // Clear the list to refresh UI elements each time ToggleUI is called
         topBar.SetActive(isUIVisible);
         dropDownMenu.SetActive(isUIVisible);
+        bottomBar.SetActive(isUIVisible);
     }
 
     public void ToggleTag()
@@ -65,5 +66,29 @@ public class Sidebar : MonoBehaviour
 
         // Update the visibility state tracker
         isNextSiteHidden = !isNextSiteHidden;
+    }
+
+    // Function to reset everything to the initial state
+    public void ResetAll()
+    {
+        // Reset auto-rotate to off
+        isAutoRotateEnabled = false;
+
+        // Reset UI visibility to true
+        isUIVisible = true;
+        topBar.SetActive(true);
+        dropDownMenu.SetActive(true);
+        bottomBar.SetActive(true);
+
+        // Reset "NextSite" objects visibility to visible
+        if (isNextSiteHidden)
+        {
+            foreach (GameObject obj in nextSiteObjects)
+            {
+                obj.SetActive(true); // Unhide the object
+            }
+            nextSiteObjects.Clear(); // Clear the list after unhiding
+            isNextSiteHidden = false;
+        }
     }
 }
