@@ -12,6 +12,8 @@ public class LaserInput : MonoBehaviour
     public SteamVR_Action_Vibration hapticAction; // Action for haptic feedback
     public GameObject Mainpage;
     public GameObject ImageMenu;
+    public GameObject SettingCanvas; // Reference to the Setting canvas
+    public GameObject VRGuideCanvas; // Reference to the VR Guide canvas
     public GameObject[] objSites;
     public GameObject topBar; // Reference to the top bar UI element
 
@@ -44,7 +46,6 @@ public class LaserInput : MonoBehaviour
         {
             objectNameCanvas.gameObject.SetActive(false);
         }
-         
     }
 
     private void Update()
@@ -63,35 +64,49 @@ public class LaserInput : MonoBehaviour
             {
                 if (lastHoveredObject != hitObject)
                 {
-                    // Reset the last hovered object if it's different from the current one
-                    if (lastHoveredObject != null)
-                    {
-                        ResetObject(lastHoveredObject);
-                    }
-
-                    // Highlight the current object
+                    ResetLastHoveredObject();
                     HighlightObject(hitObject);
-
-                    // Show the canvas with the object's name
                     ShowObjectNameCanvas(hitObject.name);
-
-                    // Trigger haptic feedback when hovering over the object
                     TriggerHapticFeedback();
-
-                    // Store the current object as the last hovered object
+                    lastHoveredObject = hitObject;
+                }
+            }
+            else if (hitObject.CompareTag("ImageMenuButton"))
+            {
+                if (lastHoveredObject != hitObject)
+                {
+                    ResetLastHoveredObject();
+                    HighlightObject(hitObject);
+                    ShowObjectNameCanvas("ImageMenu");
+                    TriggerHapticFeedback();
+                    lastHoveredObject = hitObject;
+                }
+            }
+            else if (hitObject.CompareTag("SettingButton"))
+            {
+                if (lastHoveredObject != hitObject)
+                {
+                    ResetLastHoveredObject();
+                    HighlightObject(hitObject);
+                    ShowObjectNameCanvas("Settings");
+                    TriggerHapticFeedback();
+                    lastHoveredObject = hitObject;
+                }
+            }
+            else if (hitObject.CompareTag("VRGuideButton"))
+            {
+                if (lastHoveredObject != hitObject)
+                {
+                    ResetLastHoveredObject();
+                    HighlightObject(hitObject);
+                    ShowObjectNameCanvas("VR Guide");
+                    TriggerHapticFeedback();
                     lastHoveredObject = hitObject;
                 }
             }
             else
             {
-                // Reset the last hovered object and hide the canvas if not hovering over a "NextSite"
-                if (lastHoveredObject != null)
-                {
-                    ResetObject(lastHoveredObject);
-                    lastHoveredObject = null;
-                }
-
-                // Hide the canvas when not hovering over any valid object
+                ResetLastHoveredObject();
                 HideObjectNameCanvas();
             }
 
@@ -100,8 +115,7 @@ public class LaserInput : MonoBehaviour
             {
                 Debug.Log("Controller clicked on: " + hit.transform.name);
 
-                // Handle the hit object (e.g., button click, etc.)
-                if (hitObject.CompareTag("Button"))
+                if (hitObject.CompareTag("ImageMenuButton"))
                 {
                     Mainpage.SetActive(false);
                     ImageMenu.SetActive(true);
@@ -109,53 +123,52 @@ public class LaserInput : MonoBehaviour
                 }
                 else if (hitObject.CompareTag("NextSite"))
                 {
-                    Debug.Log("Next site clicked.");
                     int siteToLoad = hitObject.GetComponent<NewSites>().GetSiteToload();
-                    Debug.Log("Loading site number: " + siteToLoad);
                     LoadSite(siteToLoad);
+                }
+                else if (hitObject.CompareTag("SettingButton"))
+                {
+                    ShowSettingCanvas();
+                }
+                else if (hitObject.CompareTag("VRGuideButton"))
+                {
+                    ShowVRGuideCanvas();
                 }
             }
         }
         else
         {
-            // If no object is hit, reset the last hovered object and hide the canvas
-            if (lastHoveredObject != null)
-            {
-                ResetObject(lastHoveredObject);
-                lastHoveredObject = null;
-            }
-
+            ResetLastHoveredObject();
             HideObjectNameCanvas();
         }
     }
 
-    // Trigger haptic feedback on the controller
-    void TriggerHapticFeedback()
+    void ResetLastHoveredObject()
     {
-        // Trigger a simple haptic pulse on the controller
-        hapticAction.Execute(0, 0.1f, 150f, 75f, pose.inputSource);
-        // Parameters:
-        // (startDelay, duration, frequency, amplitude, inputSource)
+        if (lastHoveredObject != null)
+        {
+            ResetObject(lastHoveredObject);
+            lastHoveredObject = null;
+        }
     }
 
-    // Highlight the object (change color and increase size)
+    void TriggerHapticFeedback()
+    {
+        hapticAction.Execute(0, 0.1f, 150f, 75f, pose.inputSource);
+    }
+
     void HighlightObject(GameObject obj)
     {
         Renderer renderer = obj.GetComponent<Renderer>();
         if (renderer != null)
         {
             renderer.material.color = Color.gray;  // Change to highlight color
-             
         }
 
-        // Store the original scale before increasing the size
         originalScale = obj.transform.localScale;
-
-        // Increase object size
-        obj.transform.localScale *= 1.2f;  // Adjust scale multiplier as needed
+        obj.transform.localScale *= 1.2f;
     }
 
-    // Reset the object to its original color and size
     void ResetObject(GameObject obj)
     {
         Renderer renderer = obj.GetComponent<Renderer>();
@@ -164,48 +177,49 @@ public class LaserInput : MonoBehaviour
             renderer.material.color = Color.white;  // Reset to original color
         }
 
-        // Reset object size to its original scale
         obj.transform.localScale = originalScale;
     }
 
-    // Show the object name on the fixed-position canvas
     void ShowObjectNameCanvas(string objectName)
     {
-        if (objectNameCanvas != null && objectNameText != null && ImageMenu == false)
+        if (objectNameCanvas != null && objectNameText != null)
         {
-            objectNameCanvas.gameObject.SetActive(true); // Show the canvas
-            objectNameText.text = objectName; // Set the text to the object's name
-        }
-        else if (objectNameCanvas != null && objectNameText != null )
-        {
-            objectNameCanvas.gameObject.SetActive(true); // Show the canvas
-            objectNameText.text = "Go to " + objectName; // Set the text to the object's name
+            objectNameCanvas.gameObject.SetActive(true);
+            objectNameText.text = objectName;
         }
     }
 
-    // Hide the object name canvas
     void HideObjectNameCanvas()
     {
         if (objectNameCanvas != null)
         {
-            objectNameCanvas.gameObject.SetActive(false); // Hide the canvas
+            objectNameCanvas.gameObject.SetActive(false);
         }
     }
 
-    // Load a site by hiding other sites and showing the selected one
     public void LoadSite(int siteNumber)
     {
-        // Hide all sites
-        for (int i = 0; i < objSites.Length; i++)
+        foreach (var site in objSites)
         {
-            objSites[i].SetActive(false);
+            site.SetActive(false);
         }
-        // Show the selected site
         objSites[siteNumber].SetActive(true);
-        // Hide the main menu
         ImageMenu.SetActive(false);
-        // Show the top bar (if needed)
-        //topBar.SetActive(true);
-        // Enable camera movement or any other behavior
+    }
+
+    void ShowSettingCanvas()
+    {
+        Mainpage.SetActive(false);
+        ImageMenu.SetActive(false);
+        VRGuideCanvas.SetActive(false);
+        SettingCanvas.SetActive(true);
+    }
+
+    void ShowVRGuideCanvas()
+    {
+        Mainpage.SetActive(false);
+        ImageMenu.SetActive(false);
+        SettingCanvas.SetActive(false);
+        VRGuideCanvas.SetActive(true);
     }
 }

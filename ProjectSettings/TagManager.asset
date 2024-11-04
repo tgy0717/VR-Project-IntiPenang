@@ -7,6 +7,9 @@ TagManager:
   - NextSite
   - Sound
   - Button
+  - SettingButton
+  - VRGuideButton
+  - ImageMenuButton
   layers:
   - Default
   - TransparentFX

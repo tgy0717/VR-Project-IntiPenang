@@ -10,7 +10,9 @@ public class VRController : MonoBehaviour
 
     public GameObject imageMenuCanvas;  // Reference to the ImageMenu canvas
     public GameObject mainPageCanvas;   // Reference to the MainPage canvas
-    public GameObject[] objSites;
+    public GameObject settingsCanvas;   // Reference to the Settings canvas
+    public GameObject vrGuideCanvas;    // Reference to the VR Guide canvas
+    public GameObject[] objSites;       // Array of site objects
     public SteamVR_Action_Boolean backAction;  // The action for the "Back" button (e.g., trigger press)
 
     // Speed of scrolling
@@ -44,8 +46,20 @@ public class VRController : MonoBehaviour
     // Handles the logic when the back button is pressed
     private void HandleBackButtonPress()
     {
-        // Check if the ImageMenu canvas is active
-        if (imageMenuCanvas.activeSelf)
+        // Priority for closing modals (Settings and VR Guide) before other canvases
+        if (settingsCanvas.activeSelf)
+        {
+            // If Settings is active, close it and go back to the previous canvas (ImageMenu or MainPage)
+            settingsCanvas.SetActive(false);
+            mainPageCanvas.SetActive(true);
+        }
+        else if (vrGuideCanvas.activeSelf)
+        {
+            // If VR Guide is active, close it and go back to the previous canvas
+            vrGuideCanvas.SetActive(false);
+            mainPageCanvas.SetActive(true);
+        }
+        else if (imageMenuCanvas.activeSelf)
         {
             // If ImageMenu is active, deactivate it and activate MainPage
             imageMenuCanvas.SetActive(false);
@@ -54,14 +68,36 @@ public class VRController : MonoBehaviour
         else if (!imageMenuCanvas.activeSelf && !mainPageCanvas.activeSelf)
         {
             // If neither ImageMenu nor MainPage are active, activate ImageMenu
-            for (int i = 0; i < objSites.Length; i++)
+            foreach (GameObject site in objSites)
             {
-                objSites[i].SetActive(false);
+                site.SetActive(false);
             }
             imageMenuCanvas.SetActive(true);
-           
-
-            //scrollRect.verticalNormalizedPosition = 1f;//refresh
         }
+    }
+
+    // Helper function to determine which canvas to go back to
+    private void ReturnToPreviousCanvas()
+    {
+        // If both ImageMenu and MainPage are inactive, activate ImageMenu by default
+        if (!imageMenuCanvas.activeSelf && !mainPageCanvas.activeSelf)
+        {
+            imageMenuCanvas.SetActive(true);
+        }
+    }
+
+    // Additional methods for opening Settings and VR Guide
+    public void OpenSettings()
+    {
+        settingsCanvas.SetActive(true);
+        imageMenuCanvas.SetActive(false);
+        mainPageCanvas.SetActive(false);
+    }
+
+    public void OpenVRGuide()
+    {
+        vrGuideCanvas.SetActive(true);
+        imageMenuCanvas.SetActive(false);
+        mainPageCanvas.SetActive(false);
     }
 }
