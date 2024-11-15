@@ -54,6 +54,14 @@
       "type": "boolean"
     },
     {
+      "name": "/actions/default/in/VolumnUp",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/VolumnDown",
+      "type": "boolean"
+    },
+    {
       "name": "/actions/default/out/Haptic",
       "type": "vibration"
     },
@@ -94,7 +102,7 @@
     },
     {
       "name": "/actions/platformer",
-      "usage": "single"
+      "usage": "leftright"
     },
     {
       "name": "/actions/buggy",

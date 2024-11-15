@@ -113,6 +113,22 @@ namespace Valve.VR
             }
         }
         
+        public virtual SteamVR_Action_Boolean VolumnUp
+        {
+            get
+            {
+                return SteamVR_Actions.default_VolumnUp;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean VolumnDown
+        {
+            get
+            {
+                return SteamVR_Actions.default_VolumnDown;
+            }
+        }
+        
         public virtual SteamVR_Action_Vibration Haptic
         {
             get

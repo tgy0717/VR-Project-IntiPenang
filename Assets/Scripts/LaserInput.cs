@@ -16,41 +16,35 @@ public class LaserInput : MonoBehaviour
     public GameObject VRGuideCanvas; // Reference to the VR Guide canvas
     public GameObject[] objSites;
     public GameObject topBar; // Reference to the top bar UI element
+    public GameObject hoverCaptionUI; // Reference to the hover caption UI element (always in view)
 
-    // Reference to the UI elements
-    public Canvas objectNameCanvas;  // Reference to the Canvas 
-    public TextMeshProUGUI objectNameText;  // Reference to the Text component on the Canvas
-
+    private TextMeshProUGUI hoverCaptionText; // Text component for displaying hover text
     private GameObject lastHoveredObject = null; // Store the last hovered object to reset it
     private Vector3 originalScale; // Store original scale of the object
 
     private void Start()
     {
-        // Ensure the pose component is assigned
         if (pose == null)
             pose = this.GetComponent<SteamVR_Behaviour_Pose>();
 
         if (pose == null)
             Debug.LogError("No SteamVR_Behaviour_Pose component found on this object", this);
 
-        // Assign the interact action
         if (interactAction == null)
             interactAction = SteamVR_Input.GetBooleanAction("InteractUI");
 
-        // Assign the haptic action (ensure this is set in the SteamVR Input window)
         if (hapticAction == null)
             hapticAction = SteamVR_Input.GetVibrationAction("HapticPulse");
 
-        // Hide the canvas initially
-        if (objectNameCanvas != null)
+        if (hoverCaptionUI != null)
         {
-            objectNameCanvas.gameObject.SetActive(false);
+            hoverCaptionText = hoverCaptionUI.GetComponentInChildren<TextMeshProUGUI>();
+            hoverCaptionUI.SetActive(false); // Hide initially
         }
     }
 
     private void Update()
     {
-        // Cast a ray from the controller
         Ray raycast = new Ray(transform.position, transform.forward);
         RaycastHit hit;
         bool bHit = Physics.Raycast(raycast, out hit);
@@ -59,58 +53,36 @@ public class LaserInput : MonoBehaviour
         {
             GameObject hitObject = hit.transform.gameObject;
 
-            // Handle hover logic
             if (hitObject.CompareTag("NextSite"))
             {
                 if (lastHoveredObject != hitObject)
                 {
                     ResetLastHoveredObject();
                     HighlightObject(hitObject);
-                    ShowObjectNameCanvas(hitObject.name);
                     TriggerHapticFeedback();
                     lastHoveredObject = hitObject;
                 }
+                if (!ImageMenu.activeSelf){
+                    ShowHoverCaption(hitObject);
+                }
             }
-            else if (hitObject.CompareTag("ImageMenuButton"))
+            else if (hitObject.CompareTag("ImageMenuButton") || hitObject.CompareTag("SettingButton") || hitObject.CompareTag("VRGuideButton"))
             {
                 if (lastHoveredObject != hitObject)
                 {
                     ResetLastHoveredObject();
                     HighlightObject(hitObject);
-                    ShowObjectNameCanvas("ImageMenu");
                     TriggerHapticFeedback();
                     lastHoveredObject = hitObject;
-                }
-            }
-            else if (hitObject.CompareTag("SettingButton"))
-            {
-                if (lastHoveredObject != hitObject)
-                {
-                    ResetLastHoveredObject();
-                    HighlightObject(hitObject);
-                    ShowObjectNameCanvas("Settings");
-                    TriggerHapticFeedback();
-                    lastHoveredObject = hitObject;
-                }
-            }
-            else if (hitObject.CompareTag("VRGuideButton"))
-            {
-                if (lastHoveredObject != hitObject)
-                {
-                    ResetLastHoveredObject();
-                    HighlightObject(hitObject);
-                    ShowObjectNameCanvas("VR Guide");
-                    TriggerHapticFeedback();
-                    lastHoveredObject = hitObject;
+                    HideHoverCaption();
                 }
             }
             else
             {
                 ResetLastHoveredObject();
-                HideObjectNameCanvas();
+                HideHoverCaption();
             }
 
-            // Check if the interact button is pressed
             if (interactAction.GetStateUp(pose.inputSource))
             {
                 Debug.Log("Controller clicked on: " + hit.transform.name);
@@ -139,7 +111,7 @@ public class LaserInput : MonoBehaviour
         else
         {
             ResetLastHoveredObject();
-            HideObjectNameCanvas();
+            HideHoverCaption();
         }
     }
 
@@ -180,20 +152,21 @@ public class LaserInput : MonoBehaviour
         obj.transform.localScale = originalScale;
     }
 
-    void ShowObjectNameCanvas(string objectName)
+    void ShowHoverCaption(GameObject targetObject)
     {
-        if (objectNameCanvas != null && objectNameText != null)
+        if (hoverCaptionText != null)
         {
-            objectNameCanvas.gameObject.SetActive(true);
-            objectNameText.text = objectName;
+            string objectName = targetObject.name;
+            hoverCaptionText.text = objectName;
+            hoverCaptionUI.SetActive(true);
         }
     }
 
-    void HideObjectNameCanvas()
+    void HideHoverCaption()
     {
-        if (objectNameCanvas != null)
+        if (hoverCaptionUI != null)
         {
-            objectNameCanvas.gameObject.SetActive(false);
+            hoverCaptionUI.SetActive(false);
         }
     }
 
