@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
+using UnityEngine.UI; 
 
 public class ImageMenuSearch : MonoBehaviour
 {
@@ -55,7 +55,7 @@ public class ImageMenuSearch : MonoBehaviour
         }
 
         // Adjust scroll view size based on visible items
-        AdjustScrollViewSize();
+        AdjustScrollViewSize(query);
         ResetScrollPosition(); // Scroll to top
     }
 
@@ -87,12 +87,20 @@ public class ImageMenuSearch : MonoBehaviour
     }
 
     // Adjusts the scroll view size based on visible items
-    void AdjustScrollViewSize()
+    void AdjustScrollViewSize(string query)
     {
         RectTransform contentRect = content.GetComponent<RectTransform>();
 
-        // Set the height of the content RectTransform to 1080 directly
-        contentRect.sizeDelta = new Vector2(contentRect.sizeDelta.x, 1080);
+        // Customize the size for specific queries
+        if (query == "level 4")
+        {
+            contentRect.sizeDelta = new Vector2(contentRect.sizeDelta.x, 1380);
+        }
+        else
+        {
+            // Default adjustment (e.g., for other queries)
+            contentRect.sizeDelta = new Vector2(contentRect.sizeDelta.x, 1080);
+        }
     }
 
 

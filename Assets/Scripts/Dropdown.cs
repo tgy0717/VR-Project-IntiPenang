@@ -1,14 +1,14 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI; // For handling UI elements like Dropdowns
+using UnityEngine.UI;
 
 public class DropdownMenu : MonoBehaviour
 {
     [SerializeField] private TMP_Dropdown dropDownMenu; // Reference to the Dropdown UI
     [SerializeField] private GameObject[] objSites; // Array of GameObjects for the different sites 
-     
-    public int levelNumber; // Manually set the level number (e.g., 2 or 6)
+
+    public int levelNumber; // Manually set the level number (e.g., 2, 3, 4, 5, or 6)
 
     // Start is called before the first frame update
     void Start()
@@ -22,22 +22,34 @@ public class DropdownMenu : MonoBehaviour
     {
         if (val == 0)
         {
-            // Placeholder selected, do nothing or reset the scene
             Debug.Log("Placeholder selected. No site will be loaded.");
             return;
         }
+
         int siteIndex = val - 1;
-        // You can check the value and decide which site to load based on levelNumber
-        if (levelNumber == 2)
+
+        // Handle dropdown options based on the level number
+        switch (levelNumber)
         {
-            // Handle Level 2 dropdown options
-            LoadSite(siteIndex); // val corresponds to dropdown option selected
+            case 2:
+                LoadSite(siteIndex); // Level 2 starts from index 0
+                break;
+            case 3:
+                LoadSite(siteIndex + 42); // Level 3 starts from index 42
+                break;
+            case 4:
+                LoadSite(siteIndex + 54); // Level 4 starts from index 54
+                break;
+            case 5:
+                LoadSite(siteIndex + 74); // Level 5 starts from index 74
+                break;
+            case 6:
+                LoadSite(siteIndex + 32); // Level 6 starts from index 32
+                break;
+            default:
+                Debug.LogWarning("Invalid level number.");
+                break;
         }
-        else if (levelNumber == 6)
-        {
-            // Handle Level 6 dropdown options
-            LoadSite(siteIndex + 32); // Assuming Level 6 sites start from 30
-        } 
     }
 
     // Method to load a specific site
@@ -54,10 +66,8 @@ public class DropdownMenu : MonoBehaviour
         {
             objSites[siteNumber].SetActive(true);
         }
-         
-        dropDownMenu.gameObject.SetActive(true);
 
+        // Reset dropdown menu to placeholder after selection
         dropDownMenu.value = 0;
-
     }
 }
