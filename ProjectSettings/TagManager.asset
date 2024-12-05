@@ -10,6 +10,8 @@ TagManager:
   - SettingButton
   - VRGuideButton
   - ImageMenuButton
+  - SearchDropdown
+  - QuitButton
   layers:
   - Default
   - TransparentFX

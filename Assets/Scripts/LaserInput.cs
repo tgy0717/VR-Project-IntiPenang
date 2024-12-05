@@ -66,7 +66,7 @@ public class LaserInput : MonoBehaviour
                     ShowHoverCaption(hitObject);
                 }
             }
-            else if (hitObject.CompareTag("ImageMenuButton") || hitObject.CompareTag("SettingButton") || hitObject.CompareTag("VRGuideButton"))
+            else if (hitObject.CompareTag("ImageMenuButton") || hitObject.CompareTag("SettingButton") || hitObject.CompareTag("VRGuideButton") || hitObject.CompareTag("QuitButton"))
             {
                 if (lastHoveredObject != hitObject)
                 {
@@ -105,6 +105,13 @@ public class LaserInput : MonoBehaviour
                 else if (hitObject.CompareTag("VRGuideButton"))
                 {
                     ShowVRGuideCanvas();
+                }
+                else if (hitObject.CompareTag("QuitButton"))
+                {
+                    Application.Quit();
+                    #if UNITY_EDITOR
+                        UnityEditor.EditorApplication.isPlaying = false; // Stop play mode in the editor
+                    #endif
                 }
             }
         }
