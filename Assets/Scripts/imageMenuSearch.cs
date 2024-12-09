@@ -92,7 +92,11 @@ public class ImageMenuSearch : MonoBehaviour
         RectTransform contentRect = content.GetComponent<RectTransform>();
 
         // Customize the size for specific queries
-        if (query == "level 4")
+        if (query == "level 2")
+        {
+            contentRect.sizeDelta = new Vector2(contentRect.sizeDelta.x, 2180);
+        }
+        else if (query == "level 4")
         {
             contentRect.sizeDelta = new Vector2(contentRect.sizeDelta.x, 1380);
         }
